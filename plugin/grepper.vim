@@ -445,14 +445,7 @@ endfunction
 " s:process_flags() {{{1
 function! s:process_flags(flags)
   if a:flags.stop == -1
-    if exists('s:id')
-      if has('nvim')
-        call jobstop(s:id)
-      else
-        call job_stop(s:id)
-      endif
-      unlet s:id
-    endif
+    AsyncStop
     return 1
   endif
 
