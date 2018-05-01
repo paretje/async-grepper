@@ -5,27 +5,27 @@ Before:
 
 Execute (:Grepper -noprompt -tool ag -grepprg ag --column --nogroup -s Foo include):
   Grepper -noprompt -tool ag -grepprg ag --column --nogroup -s Foo include
-  AssertEqual len(getqflist()), 1
-  AssertEqual winnr('$'), 2
-  AssertEqual w:quickfix_title, 'ag --column --nogroup -s Foo include '
-  AssertEqual getline('.')[:6], 'include'
+  AssertEqual 1, len(getqflist()), string(getqflist())
+  AssertEqual 2, winnr('$')
+  AssertEqual 'ag --column --nogroup -s Foo include ', w:quickfix_title
+  AssertEqual 'include', getline('.')[:6]
 
 Execute (:Grepper -noprompt -noswitch -tool ag -grepprg ag --column --nogroup -s Foo include):
   Grepper -noprompt -noswitch -tool ag -grepprg ag --column --nogroup -s Foo include
-  AssertEqual winnr('$'), 2
-  AssertEqual len(getqflist()), 1
+  AssertEqual 2, winnr('$')
+  AssertEqual 1, len(getqflist())
   " Doesn't work on Travis:
   " Log getline('.')
   " Assert line2byte('$') == -1
 
 Execute (:Grepper -noprompt -noopen -tool ag -grepprg ag --column --nogroup -s Foo include):
   Grepper -noprompt -noopen -tool ag -grepprg ag --column --nogroup -s Foo include
-  AssertEqual len(getqflist()), 1
-  AssertEqual winnr('$'), 1
-  AssertEqual line2byte('$'), -1
+  AssertEqual 1, len(getqflist())
+  AssertEqual 1, winnr('$')
+  AssertEqual -1, line2byte('$')
 
 Execute (:Grepper -noprompt -noopen -jump -tool ag -grepprg ag --column --nogroup -s Foo include):
   Grepper -noprompt -noopen -jump -tool ag -grepprg ag --column --nogroup -s Foo include
-  AssertEqual len(getqflist()), 1
-  AssertEqual winnr('$'), 1
-  AssertEqual getline('.'), 'Foo: This is just a random'
+  AssertEqual 1, len(getqflist())
+  AssertEqual 1, winnr('$')
+  AssertEqual 'Foo: This is just a random', getline('.')
