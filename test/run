@@ -23,5 +23,22 @@ if ! [ -e vader.vim ]; then
   fi
 fi
 
+# Look for existing asyncrun installation.
+if ! [ -e ayncrun.vim ]; then
+  asyncrun_dir=
+  shopt -s nullglob
+  asyncrun_file=( "${HOME}"/.vim/*{bundle,plugged}*/asyncrun*/plugin/asyncrun.vim )
+  if [ -f "${asyncrun_file[0]}" ]; then
+      # Remove "plugin/asyncrun.vim" suffix.
+      asyncrun_dir=${asyncrun_file[0]%/*/*}
+  fi
+
+  if [ -d "$asyncrun_dir" ]; then
+      [[ ! -L asyncrun.vim ]] && ln -s "$asyncrun_dir" asyncrun.vim
+  else
+      git clone https://github.com/skywind3000/asyncrun.vim.git
+  fi
+fi
+
 echo '(Be patient.. testing can take a while.)'
 env HOME=/dev/null vim -Nnu vimrc -i NONE +'Vader! feature/*.vader'
