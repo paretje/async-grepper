@@ -7,9 +7,13 @@ addons:
       - silversearcher-ag
 
 install: |
-  eval "$(curl -Ss https://raw.githubusercontent.com/neovim/bot-ci/master/scripts/travis-setup.sh) nightly-x64"
-  mkdir -p ${DEPS}/bin
-  ln -s $(which nvim) ${DEPS}/bin/vim
-  export VADER_OUTPUT_FILE=/dev/stderr
+  C_OPTS="--prefix=$DEPS --with-features=huge --disable-gui "
+  git clone --depth 1 https://github.com/vim/vim
+  cd vim
+  export PATH=/usr/bin:$PATH
+  ./configure $C_OPTS
+  make
+  make install
+  cd -
 
 script: test/run
