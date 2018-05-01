@@ -1,6 +1,11 @@
 sudo: false
 dist: trusty
 
+env:
+  global:
+    - DEPS=$HOME/deps
+    - PATH=$DEPS/bin:$PATH
+
 addons:
   apt:
     packages:
