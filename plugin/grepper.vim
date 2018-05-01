@@ -717,117 +717,31 @@ endfunction
 
 " s:run() {{{1
 function! s:run(flags)
-  if a:flags.quickfix
-    call setqflist([])
-  else
-    call setloclist(0, [])
-  endif
-
-  let work_dir  = s:compute_working_directory(a:flags)
-  let orig_dir  = s:chdir_push(work_dir)
+  let l:work_dir  = s:compute_working_directory(a:flags)
   let s:cmdline = s:build_cmdline(a:flags)
-
-  " 'cmd' and 'options' are only used for async execution.
-  if has('win32')
-    let cmd = 'cmd.exe /c '. s:cmdline
-  else
-    let cmd = ['sh', '-c', s:cmdline]
-  endif
-
-  let options = {
-        \ 'cmd':       s:cmdline,
-        \ 'work_dir':  work_dir,
-        \ 'flags':     a:flags,
-        \ 'addexpr':   a:flags.quickfix ? 'caddexpr' : 'laddexpr',
-        \ 'window':    winnr(),
-        \ 'tabpage':   tabpagenr(),
-        \ 'stdoutbuf': [],
-        \ }
-
   call s:store_errorformat(a:flags)
 
   if &verbose
-    echomsg 'grepper: running' string(cmd)
+    echomsg 'grepper: running' s:cmdline
   endif
 
-  if has('nvim')
-    if exists('s:id')
-      silent! call jobstop(s:id)
-    endif
-    try
-      let s:id = jobstart(cmd, extend(options, {
-            \ 'on_stdout': function('s:on_stdout_nvim'),
-            \ 'on_stderr': function('s:on_stdout_nvim'),
-            \ 'stdout_buffered': 1,
-            \ 'stderr_buffered': 1,
-            \ 'on_exit':   function('s:on_exit'),
-            \ }))
-    finally
-      call s:chdir_pop(orig_dir)
-    endtry
-  elseif !get(w:, 'testing') && has('patch-7.4.1967')
-    if exists('s:id')
-      silent! call job_stop(s:id)
-    endif
-
-    try
-      let s:id = job_start(cmd, {
-            \ 'in_io':    'null',
-            \ 'err_io':   'out',
-            \ 'out_cb':   function('s:on_stdout_vim', options),
-            \ 'close_cb': function('s:on_exit', options),
-            \ })
-    finally
-      call s:chdir_pop(orig_dir)
-    endtry
-  else
-    try
-      execute 'silent' (a:flags.quickfix ? 'cgetexpr' : 'lgetexpr') 'system(s:cmdline)'
-    finally
-      call s:chdir_pop(orig_dir)
-    endtry
-    call s:finish_up(a:flags)
-  endif
+  execute 'AsyncRun! -post=call\ <SNR>' . s:SID() . '_restore_errorformat() -cwd=' . fnameescape(l:work_dir) . ' ' . s:cmdline
+  call s:open_results(a:flags)
 endfunction
 
-" s:finish_up() {{{1
-function! s:finish_up(flags)
-  let qf = a:flags.quickfix
-  let list = qf ? getqflist() : getloclist(0)
-  let size = len(list)
+" s:SID() {{{1
+function s:SID()
+  return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze_SID$')
+endfun
 
+" s:open_results() {{{1
+function! s:open_results(flags)
   let cmdline = s:cmdline
   let s:cmdline = ''
 
-  call s:restore_errorformat()
-
-  try
-    " TODO: Remove condition if nvim 0.2.0+ enters Debian stable.
-    let attrs = has('nvim') && !has('nvim-0.2.0')
-          \ ? cmdline
-          \ : {'title': cmdline, 'context': @/}
-    if qf
-      call setqflist(list, a:flags.append ? 'a' : 'r', attrs)
-    else
-      call setloclist(0, list, a:flags.append ? 'a' : 'r', attrs)
-    endif
-  catch /E118/
-  endtry
-
-  if size == 0
-    execute (qf ? 'cclose' : 'lclose')
-    redraw
-    echo 'No matches found.'
-    return
-  endif
-
-  if a:flags.jump
-    execute (qf ? 'cfirst' : 'lfirst')
-  endif
-
   " Also open if the list contains any invalid entry.
-  if a:flags.open || !empty(filter(list, 'v:val.valid == 0'))
-    execute (qf ? 'botright copen' : 'lopen') (size > 10 ? 10 : size)
+  if a:flags.open
+    botright copen 10
     let w:quickfix_title = cmdline
     setlocal nowrap
 
@@ -835,20 +749,8 @@ function! s:finish_up(flags)
       call feedkeys("\<c-w>p", 'n')
     endif
   endif
-
   redraw
-  echo printf('Found %d matches.', size)
-
-  if a:flags.side
-    call s:side(a:flags)
-  endif
-
-  if exists('#User#Grepper')
-    execute 'doautocmd' (s:has_doau_modeline ? '<nomodeline>' : '') 'User Grepper'
-  endif
 endfunction
-
-" }}}1
 
 " -highlight {{{1
 " s:highlight_query() {{{2
