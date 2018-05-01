@@ -13,8 +13,9 @@ This plugin works with Vim and Neovim. It's based on
 [asyncrun.vim](https://github.com/skywind3000/asyncrun.vim) to execute the
 grepper commands, and append the results asynchronously to the quickfix list.
 
-_Disclaimer: using the location list and stopping search after a certain number
-of results have been returned are currently unsupported. PR's welcome. _
+_Disclaimer: using the location list, appending to an existing quickfix list
+and stopping search after a certain number of results have been returned are
+currently unsupported. PR's welcome. _
 
 ---
 
