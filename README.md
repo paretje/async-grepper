@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/paretje/async-grepper.svg?branch=master)](https://travis-ci.org/paretje/async-grepper)
+
 Use your **favorite grep tool**
 ([ag](https://github.com/ggreer/the_silver_searcher),
 [ack](http://beyondgrep.com), [git grep](https://git-scm.com/docs/git-grep),
