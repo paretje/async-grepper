@@ -1,13 +1,3 @@
-[![Build Status](https://travis-ci.org/mhinz/vim-grepper.svg?branch=master)](https://travis-ci.org/mhinz/vim-grepper)
-
-<br />
-<br />
-
-![vim-grepper](https://raw.githubusercontent.com/mhinz/vim-grepper/master/pictures/grepper-logo.png)
-
-<br />
-<br />
-
 Use your **favorite grep tool**
 ([ag](https://github.com/ggreer/the_silver_searcher),
 [ack](http://beyondgrep.com), [git grep](https://git-scm.com/docs/git-grep),
@@ -15,14 +5,16 @@ Use your **favorite grep tool**
 [pt](https://github.com/monochromegane/the_platinum_searcher),
 [sift](https://sift-tool.org),
 [findstr](https://www.microsoft.com/resources/documentation/windows/xp/all/proddocs/en-us/findstr.mspx),
-grep) to start an **asynchronous search**. All matches will be put in a
-**quickfix or location list**.
+grep) to start an **asynchronous search**. Matches will be added to the
+quickfix list **as they are found**.
 
-This plugin works with Vim and Neovim on Unix-like systems. It's mostly working
-on Windows as well.
+This plugin works with Vim and Neovim. It's based on
+[vim-grepper](https://github.com/mhinz/vim-grepper), but used
+[asyncrun.vim](https://github.com/skywind3000/asyncrun.vim) to execute the
+grepper commands, and append the results asynchronously to the quickfix list.
 
-_Disclaimer: From my point of view it's feature-complete, so I won't add new
-features or put much time into reviewing complex PRs._
+_Disclaimer: using the location list, `g:grepper.stop` and the side window
+feature are currently not supported. PR's welcome. _
 
 ---
 
@@ -41,8 +33,8 @@ features or put much time into reviewing complex PRs._
 
 ---
 
-_If you like [ack.vim](https://github.com/mileszs/ack.vim) and
-[ag.vim](https://github.com/rking/ag.vim), you will love vim-grepper._
+_If you like [vim-grepper](https://github.com/mhinz/vim-grepper), you will love
+async-grepper._
 
 ## Documentation
 
@@ -61,10 +53,12 @@ Use your [favorite plugin
 manager](https://github.com/mhinz/vim-galore#managing-plugins), e.g.
 [vim-plug](https://github.com/junegunn/vim-plug):
 
-    Plug 'mhinz/vim-grepper'
+    Plug 'skywind3000/asyncrun.vim'
+    Plug 'paretje/asyc-grepper'
 
 If you prefer lazy loading:
 
+    Plug 'skywind3000/asyncrun.vim', { 'on': 'AsyncRun' }
     Plug 'mhinz/vim-grepper', { 'on': ['Grepper', '<plug>(GrepperOperator)'] }
 
 ## Demo
@@ -81,5 +75,3 @@ Grepping only files currently loaded in Vim:
 
 If you like this plugin, star it! It's a great way of getting feedback. The same
 goes for reporting issues or feature requests.
-
-Contact: [Twitter](https://twitter.com/_mhinz_)

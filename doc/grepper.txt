@@ -1,10 +1,7 @@
-*grepper.txt*  Helps you win at grep!
+*grepper.txt*  Helps you win at grep without delay!
 *grepper*
 
-  by Marco Hinz~
-
-  Twitter: https://twitter.com/_mhinz_
-  Github:  http://github.com/mhinz
+  by Marco Hinz, changed to use asyncrun.vim by Kevin Velghe~
 >
   If you use any of my plugins, please star them on github. It's a great way
   of getting feedback and gives me the kick to put more time into their
@@ -41,8 +38,10 @@ You choose a tool, enter a query, and get your matches into a |quickfix| list.
 
 If the query is empty, |<cword>| will be used as query.
 
-Searches (Neovim and Vim 7.4.1967+) will be executed asynchronously. Thus you
-will be able to continue editing while the grep program is still running.
+Searches will be executed asynchronously using asyncrun.vim. Thus you will be
+able to continue editing while the grep program is still running, and the
+results will be appended to the quickfix window as they are returned by the
+grep program.
 
 These tools are supported by default:
 
@@ -115,6 +114,8 @@ Highlight found matches.
 <
 Use the quickfix list for the matches or the location list otherwise.
 
+NOTE: currently, the quickfix will be used, even when quickfix = 0.
+
 ------------------------------------------------------------------------------
                                                                 *g:grepper.open*  >
     let g:grepper.open = 1
@@ -169,8 +170,8 @@ The following values are available:
                                                                  *g:grepper.dir*  >
     let g:grepper.dir = 'cwd'
 <
-Change working directory before grepping. If the directory changes, Grepper
-won't change back after the search finishes.
+Change working directory before grepping. The current working directory will
+be restored when execution started.
 
  cwd~
     Use the current working directory as reported by |:pwd|.
@@ -214,6 +215,8 @@ Only show the tool name in the prompt, without any of its arguments.
 Open a new window and show matches with surrounding context. See |grepper-side|
 for details.
 
+NOTE: currently not supported.
+
 ------------------------------------------------------------------------------
                                                             *g:grepper.side_cmd*  >
     let g:grepper.side_cmd = 'vnew'
@@ -255,6 +258,8 @@ that were found so far can be accessed.
 Chances are, if you have more than 5000 matches, you executed Grepper in a
 place with too many subdirectories or your search query was too general or
 both. This limits the impact of otherwise long-running processes.
+
+NOTE: currently not supported.
 
 ------------------------------------------------------------------------------
                                                               *g:grepper.append*  >
@@ -327,6 +332,8 @@ Overrules |g:grepper.switch|.
 <
 Overrules |g:grepper.quickfix|.
 
+NOTE: currently noquickfix is ignored.
+
 ------------------------------------------------------------------------------
                                                                *:Grepper-prompt*  >
     -[no]prompt
@@ -344,6 +351,8 @@ Overrules |g:grepper.dir|.
     -side
 <
 Overrules |g:grepper.side|.
+
+NOTE: currently not supported.
 
 ------------------------------------------------------------------------------
                                                                  *:Grepper-tool*  >
@@ -393,6 +402,8 @@ This flag can be used in two ways:
     `:Grepper -stop`      stop the currently running search
 
 NOTE: Starting a new search will stop the currently running job anyway.
+
+NOTE: currently not supported.
 
 ------------------------------------------------------------------------------
                                                                *:Grepper-append*  >
@@ -551,6 +562,8 @@ SIDE                                                              *grepper-side*
 
 This feature opens a new window containing all matches plus three lines of
 surround context. Matches near to each other get merged into the same context.
+
+NOTE: currently not supported.
 
 Implies -noopen and -highlight.
 
