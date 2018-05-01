@@ -41,4 +41,4 @@ if ! [ -e ayncrun.vim ]; then
 fi
 
 echo '(Be patient.. testing can take a while.)'
-env HOME=/dev/null vim -Nnu vimrc -i NONE +'Vader! feature/*.vader'
+env HOME=/tmp vim -Nnu vimrc -i NONE +'Vader! feature/*.vader'
