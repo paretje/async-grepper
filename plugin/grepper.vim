@@ -631,6 +631,10 @@ function! s:run(flags)
     echomsg 'grepper: running' s:cmdline
   endif
 
+  " TODO: Remove condition if nvim 0.2.0+ enters Debian stable.
+  let a:flags._qf_attrs = has('nvim') && !has('nvim-0.2.0')
+                      \ ? s:cmdline
+                      \ : {'title': s:cmdline, 'context': {'query': @/}}
   execute 'AsyncRun! -post=call\ <SNR>' . s:SID() . '_finish_up(' . escape(string(a:flags), ' \%#') . ') -cwd=' . fnameescape(l:work_dir) . ' ' . s:cmdline
   call s:open_results(a:flags)
 endfunction
@@ -642,12 +646,12 @@ endfun
 
 " s:open_results() {{{1
 function! s:open_results(flags)
-  call setqflist(getqflist()[1:])
+  call setqflist(getqflist()[1:], 'r')
+  call setqflist([], 'a', a:flags._qf_attrs)
+
   " Also open if the list contains any invalid entry.
-  " TODO: cancel job when window is closed
   if a:flags.open
     botright copen 10
-    " TODO: fix or remove setting quickfix title
     let w:quickfix_title = s:cmdline
     setlocal nowrap
 
@@ -655,7 +659,6 @@ function! s:open_results(flags)
       call feedkeys("\<c-w>p", 'n')
     endif
   endif
-  redraw
 endfunction
 
 " s:finish_up() {{{1
@@ -664,7 +667,9 @@ function! s:finish_up(flags)
 
   call s:restore_errorformat()
 
-  let size = len(getqflist()) - 1
+  call setqflist(getqflist()[:-2], 'r')
+  call setqflist([], 'a', a:flags._qf_attrs)
+  let size = len(getqflist())
   if size > 0
     echo printf('Found %d matches.', size)
   else
@@ -749,7 +754,7 @@ function! s:side_create_window(flags) abort
   "   [1] = start of context
   "   [2] = end of context
   let regions = {}
-  let list = getqflist()[:-2]
+  let list = getqflist()
 
   " process quickfix entries
   for entry in list
