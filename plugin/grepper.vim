@@ -135,78 +135,6 @@ endif
 let s:cmdline = ''
 let s:slash   = exists('+shellslash') && !&shellslash ? '\' : '/'
 
-" Job handlers {{{1
-" s:on_stdout_nvim() {{{2
-function! s:on_stdout_nvim(_job_id, data, _event) dict abort
-  if !exists('s:id')
-    return
-  endif
-
-  let orig_dir = s:chdir_push(self.work_dir)
-
-  try
-    if empty(a:data[-1])
-      " Second-last item is the last complete line in a:data.
-      noautocmd execute self.addexpr 'self.stdoutbuf + a:data[:-2]'
-      let self.stdoutbuf = []
-    else
-      if empty(self.stdoutbuf)
-        " Last item in a:data is an incomplete line. Put into buffer.
-        let self.stdoutbuf = [remove(a:data, -1)]
-        noautocmd execute self.addexpr 'a:data'
-      else
-        " Last item in a:data is an incomplete line. Append to buffer.
-        let self.stdoutbuf = self.stdoutbuf[:-2]
-              \ + [self.stdoutbuf[-1] . get(a:data, 0, '')]
-              \ + a:data[1:]
-      endif
-    endif
-    if self.flags.stop > 0
-      let nmatches = len(self.flags.quickfix ? getqflist() : getloclist(0))
-      if nmatches >= self.flags.stop || len(self.stdoutbuf) > self.flags.stop
-        " Add the remaining data
-        let n_rem_lines = self.flags.stop - nmatches - 1
-        if n_rem_lines > 0
-          noautocmd execute self.addexpr 'self.stdoutbuf[:n_rem_lines]'
-        endif
-
-        call jobstop(s:id)
-        unlet s:id
-      endif
-    endif
-  finally
-    call s:chdir_pop(orig_dir)
-  endtry
-endfunction
-
-" s:on_stdout_vim() {{{2
-function! s:on_stdout_vim(_job_id, data) dict abort
-  if !exists('s:id')
-    return
-  endif
-
-  let orig_dir = s:chdir_push(self.work_dir)
-
-  try
-    noautocmd execute self.addexpr 'a:data'
-    if self.flags.stop > 0
-          \ && len(self.flags.quickfix ? getqflist() : getloclist(0)) >= self.flags.stop
-      call job_stop(s:id)
-      unlet s:id
-    endif
-  finally
-    call s:chdir_pop(orig_dir)
-  endtry
-endfunction
-
-" s:on_exit() {{{2
-function! s:on_exit(...) dict abort
-  execute 'tabnext' self.tabpage
-  execute self.window .'wincmd w'
-  silent! unlet s:id
-  return s:finish_up(self.flags)
-endfunction
-
 " Completion {{{1
 " grepper#complete() {{{2
 function! grepper#complete(lead, line, _pos) abort
@@ -416,23 +344,6 @@ function! s:compute_working_directory(flags) abort
     endif
   endfor
   return ''
-endfunction
-
-" s:chdir_push() {{{2
-function! s:chdir_push(work_dir)
-  if !empty(a:work_dir)
-    let cwd = getcwd()
-    execute 'lcd' a:work_dir
-    return cwd
-  endif
-  return ''
-endfunction
-
-" s:chdir_pop() {{{2
-function! s:chdir_pop(buf_dir)
-  if !empty(a:buf_dir)
-    execute 'lcd' fnameescape(a:buf_dir)
-  endif
 endfunction
 
 " s:get_config() {{{2
@@ -740,6 +651,7 @@ function! s:open_results(flags)
   let s:cmdline = ''
 
   " Also open if the list contains any invalid entry.
+  " TODO: cancel job when window is closed
   if a:flags.open
     botright copen 10
     let w:quickfix_title = cmdline
