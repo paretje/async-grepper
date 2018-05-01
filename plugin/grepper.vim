@@ -487,6 +487,8 @@ function! s:process_flags(flags)
     elseif a:flags.prompt_quote == 1
       let a:flags.query = shellescape(a:flags.query)
     endif
+  else
+    call histadd('input', a:flags.query)
   endif
 
   if a:flags.side
@@ -667,7 +669,13 @@ endfunction
 " -highlight {{{1
 " s:highlight_query() {{{2
 function! s:highlight_query(flags)
-  let query = has_key(a:flags, 'query_orig') ? a:flags.query_orig : a:flags.query
+  if has_key(a:flags, 'query_orig')
+    let query = a:flags.query_orig
+  else
+    " Remove any flags at the beginning, e.g. when using '-uu' with rg, but
+    " keep plain '-'.
+    let query = substitute(a:flags.query, '\v-\w+\s+', '', 'g')
+  endif
 
   " Change Vim's '\'' to ' so it can be understood by /.
   let vim_query = substitute(query, "'\\\\''", "'", 'g')
