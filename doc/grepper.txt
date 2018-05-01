@@ -215,8 +215,6 @@ Only show the tool name in the prompt, without any of its arguments.
 Open a new window and show matches with surrounding context. See |grepper-side|
 for details.
 
-NOTE: currently not supported.
-
 ------------------------------------------------------------------------------
                                                             *g:grepper.side_cmd*  >
     let g:grepper.side_cmd = 'vnew'
@@ -351,8 +349,6 @@ Overrules |g:grepper.dir|.
     -side
 <
 Overrules |g:grepper.side|.
-
-NOTE: currently not supported.
 
 ------------------------------------------------------------------------------
                                                                  *:Grepper-tool*  >
@@ -562,8 +558,6 @@ SIDE                                                              *grepper-side*
 
 This feature opens a new window containing all matches plus three lines of
 surround context. Matches near to each other get merged into the same context.
-
-NOTE: currently not supported.
 
 Implies -noopen and -highlight.
 

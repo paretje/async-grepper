@@ -638,7 +638,7 @@ function! s:run(flags)
     echomsg 'grepper: running' s:cmdline
   endif
 
-  execute 'AsyncRun! -post=call\ <SNR>' . s:SID() . '_restore_errorformat() -cwd=' . fnameescape(l:work_dir) . ' ' . s:cmdline
+  execute 'AsyncRun! -post=call\ <SNR>' . s:SID() . '_finish_up(' . escape(string(a:flags), ' \%#') . ') -cwd=' . fnameescape(l:work_dir) . ' ' . s:cmdline
   call s:open_results(a:flags)
 endfunction
 
@@ -649,14 +649,13 @@ endfun
 
 " s:open_results() {{{1
 function! s:open_results(flags)
-  let cmdline = s:cmdline
-  let s:cmdline = ''
-
+  call setqflist(getqflist()[1:])
   " Also open if the list contains any invalid entry.
   " TODO: cancel job when window is closed
   if a:flags.open
     botright copen 10
-    let w:quickfix_title = cmdline
+    " TODO: fix or remove setting quickfix title
+    let w:quickfix_title = s:cmdline
     setlocal nowrap
 
     if !a:flags.switch
@@ -664,6 +663,32 @@ function! s:open_results(flags)
     endif
   endif
   redraw
+endfunction
+
+" s:finish_up() {{{1
+function! s:finish_up(flags)
+  let s:cmdline = ''
+
+  call s:restore_errorformat()
+
+  let size = len(getqflist()) - 1
+  if size > 0
+    echo printf('Found %d matches.', size)
+  else
+    if a:flags.open
+      cclose
+    endif
+    echo 'No matches found.'
+    return
+  endif
+
+  if a:flags.side
+    call s:side(a:flags)
+  endif
+
+  if exists('#User#Grepper')
+    execute 'doautocmd' (s:has_doau_modeline ? '<nomodeline>' : '') 'User Grepper'
+  endif
 endfunction
 
 " -highlight {{{1
@@ -731,7 +756,7 @@ function! s:side_create_window(flags) abort
   "   [1] = start of context
   "   [2] = end of context
   let regions = {}
-  let list = a:flags.quickfix ? getqflist() : getloclist(0)
+  let list = getqflist()[:-2]
 
   " process quickfix entries
   for entry in list
