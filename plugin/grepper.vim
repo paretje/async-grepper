@@ -680,6 +680,10 @@ function! s:finish_up(flags)
     return
   endif
 
+  if a:flags.jump
+    cfirst
+  endif
+
   if a:flags.side
     call s:side(a:flags)
   endif
