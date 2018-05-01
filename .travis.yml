@@ -14,6 +14,7 @@ install: |
   ./configure $C_OPTS
   make
   make install
+  vim --version
   cd -
 
 script: test/run
